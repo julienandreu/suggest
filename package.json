@@ -1,0 +1,43 @@
+{
+  "name": "suggest",
+  "version": "0.1.0",
+  "description": "Suggest a commit based on your active changes",
+  "main": "index.mjs",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/julienandreu/suggest.git"
+  },
+  "keywords": [
+    "git",
+    "commit",
+    "suggest",
+    "ai",
+    "prompt"
+  ],
+  "funding": "https://github.com/sponsors/julienandreu",
+  "author": {
+    "name": "Julien Andreu",
+    "email": "julienandreu@me.com",
+    "url": "https://www.julienandreu.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/julienandreu/suggest/issues"
+  },
+  "homepage": "https://github.com/julienandreu/suggest#readme",
+  "dependencies": {
+    "clipboardy": "^4.0.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.21.4",
+    "pkg": "^5.8.1"
+  }
+}
