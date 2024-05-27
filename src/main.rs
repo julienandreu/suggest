@@ -31,7 +31,7 @@ fn main() {
 
     // Generate git commit command
     let commit_prompt = format!(
-        "I want you to act as a commit message generator. Based on the provided summary of the changes, generate a commit message in the conventional commit format. The commit message should include a detailed multi-paragraph body. Format the message so it can be used directly in a 'git commit -m' shell command, with appropriate escaping for double quotes and new lines. Ensure the output is a single line with '\\\"' for double quotes and '\\n' for new lines. Do not include any explanations!
+        "I want you to act as a commit message generator. Based on the provided summary of the changes, generate a commit message in the conventional commit format. The commit message should include a detailed multi-paragraph body. Format the message so it can be used directly in a 'git commit -m' shell command, with appropriate escaping for double quotes and new lines. Ensure the output is a single line with '\\\"' for double quotes, '\\n' for new lines '\\\'' for backticks '`'. Do not include any explanations!
 
 ---START OF THE DESCRIPTION---
 {}
@@ -39,7 +39,9 @@ fn main() {
         description
     );
     let commit = run(&commit_prompt).unwrap_or_default();
-    clipboard_ctx.set_contents(commit.to_owned()).unwrap();
+    clipboard_ctx
+        .set_contents(commit_prompt.to_owned())
+        .unwrap();
 
     let duration = start.elapsed();
     sp.stop_with_message(format!("Done in {:?}!", duration));
