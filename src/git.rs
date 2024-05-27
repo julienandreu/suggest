@@ -9,10 +9,7 @@ pub fn get_commit_id(input: Option<String>) -> Option<String> {
             .expect("Failed to execute git cat-file");
 
         if output.status.success() {
-            let stdout = String::from_utf8_lossy(&output.stdout);
-            println!("{:?}", stdout);
-
-            if stdout.contains("commit") {
+            if String::from_utf8_lossy(&output.stdout).contains("commit") {
                 return Some(input);
             }
         }
@@ -23,11 +20,15 @@ pub fn get_commit_id(input: Option<String>) -> Option<String> {
 
 pub fn get_diff(input: Option<String>) -> Result<String, Error> {
     let output = match input {
-        Some(input) => Command::new("git")
-            .current_dir(env::current_dir().unwrap())
-            .args(&["show", &input])
-            .output()
-            .expect("Failed to execute git show"),
+        Some(input) => {
+            let input_minus_one = format!("{}~1", &input);
+
+            Command::new("git")
+                .current_dir(env::current_dir().unwrap())
+                .args(&["diff", &input_minus_one, &input])
+                .output()
+                .expect("Failed to execute git show")
+        }
         None => Command::new("git")
             .current_dir(env::current_dir().unwrap())
             .args(&["diff", "HEAD", "HEAD~1"])
