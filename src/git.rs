@@ -22,7 +22,6 @@ pub fn get_diff(input: Option<String>) -> Result<String, Error> {
     let output = match input {
         Some(input) => {
             let input_minus_one = format!("{}~1", &input);
-
             Command::new("git")
                 .current_dir(env::current_dir().unwrap())
                 .args(&["diff", &input_minus_one, &input])
@@ -31,7 +30,7 @@ pub fn get_diff(input: Option<String>) -> Result<String, Error> {
         }
         None => Command::new("git")
             .current_dir(env::current_dir().unwrap())
-            .args(&["diff", "HEAD", "HEAD~1"])
+            .args(&["diff", "--cached"])
             .output()
             .expect("Failed to execute git diff"),
     };
