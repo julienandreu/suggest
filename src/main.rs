@@ -7,15 +7,21 @@ use suggest::{
     llm::run,
 };
 
+// fn
+
 fn main() {
     let start = Instant::now();
+    let model = std::env::args().nth(1).unwrap_or("llama3".to_owned());
 
     let mut clipboard_ctx = ClipboardContext::new().unwrap();
     let context = Context::load();
     let commit_id = get_commit_id(std::env::args().last());
     let diff = get_diff(commit_id);
 
-    let mut sp = Spinner::new(Spinners::Dots, "Analyzing staged changes...".into());
+    let mut sp = Spinner::new(
+        Spinners::Dots,
+        format!("Analyzing staged changes using {}...", model),
+    );
 
     // Generate description
     let description_prompt = format!(
@@ -27,18 +33,21 @@ fn main() {
         serde_json::to_string(&context.unwrap_or_default()).unwrap(),
         diff.unwrap_or_default()
     );
-    let description = run(&description_prompt).unwrap_or_default();
+    let description = run(&model, &description_prompt).unwrap_or_default();
 
     // Generate git commit command
     let commit_prompt = format!(
-        "I want you to act as a commit message generator. Based on the provided summary of the changes, generate a commit message in the conventional commit format. The commit message should include a detailed multi-paragraph body. Format the message so it can be used directly in a 'git commit -m' shell command, with appropriate escaping for double quotes and new lines. Ensure the output is a single line with '\\\"' for double quotes, '\\n' for new lines '\\\'' for backticks '`'. Do not include any explanations!
+        "Based on the following git diff description summary, please write the ideal git commit command that includes all staged changes.
+        The commit message should adhere to the Conventional Commits specification outlined here: https://www.conventionalcommits.org/en/v1.0.0/#specification
+        Ensure the commit message is human-readable and provides an exhaustive description of the changes made.
+        Providing a clear and descriptive commit message is crucial for maintaining project history and facilitating collaboration.
 
----START OF THE DESCRIPTION---
+---START OF THE GIT-DIFF SUMMARY DESCRIPTION---
 {}
----END OF THE DESCRIPTION---",
+---END OF THE GIT-DIFF SUMMARY DESCRIPTION---",
         description
     );
-    let commit = run(&commit_prompt).unwrap_or_default();
+    let commit = run(&model, &commit_prompt).unwrap_or_default();
     clipboard_ctx
         .set_contents(commit_prompt.to_owned())
         .unwrap();
