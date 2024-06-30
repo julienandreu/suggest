@@ -7,8 +7,6 @@ use suggest::{
     llm::run,
 };
 
-// fn
-
 fn main() {
     let start = Instant::now();
     let model = std::env::args().nth(1).unwrap_or("llama3".to_owned());
@@ -25,7 +23,14 @@ fn main() {
 
     // Generate description
     let description_prompt = format!(
-        r"Based on the context of the application: {}, describe the changes in my current commit from the following 'git diff --staged' output. Provide a detailed description that summarizes what the changes do and why they were made.
+        r"Based on the context of the application: {},
+        Describe the changes in my current commit from the following
+        'git diff --staged' output.
+        Provide a detailed description that summarizes what the changes do and
+        why they were made.
+        Prioritize what seems to have an impact and what is not important.
+        The description should highlight the main/core changes to be used
+        in a git commit message after this.
 
 ---START OF THE GIT-DIFF---
 {}
@@ -35,12 +40,33 @@ fn main() {
     );
     let description = run(&model, &description_prompt).unwrap_or_default();
 
+    let duration = start.elapsed();
+    sp.stop_with_message(format!("Done in {:?}!", duration));
+
+    let mut sp = Spinner::new(
+        Spinners::Dots,
+        format!("Generating commit message using {}...", model),
+    );
+
     // Generate git commit command
     let commit_prompt = format!(
-        "Based on the following git diff description summary, please write the ideal git commit command that includes all staged changes.
-        The commit message should adhere to the Conventional Commits specification outlined here: https://www.conventionalcommits.org/en/v1.0.0/#specification
-        Ensure the commit message is human-readable and provides an exhaustive description of the changes made.
-        Providing a clear and descriptive commit message is crucial for maintaining project history and facilitating collaboration.
+        r"Based on the following description summary, please write the ideal
+        git commit command that includes all staged changes.
+        The commit message should adhere to the Conventional Commits
+        specification outlined here:
+        https://www.conventionalcommits.org/en/v1.0.0/#specification
+
+        Ensure the commit message is human-readable and provides an exhaustive
+        description of the changes made.
+        Providing a clear and descriptive commit message is crucial for
+        maintaining project history and facilitating collaboration.
+
+        This message should be correctly escaped so I can use it directly in
+        my terminal.
+
+        It should also highlight the most important changes and be exhaustive
+        as well, so I could see really quickly what is onboarded in the changes
+        and I could then generate proper Changelog files based on them.
 
 ---START OF THE GIT-DIFF SUMMARY DESCRIPTION---
 {}
